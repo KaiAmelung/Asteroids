@@ -48,7 +48,6 @@ public class AsteroidPanel extends JPanel
    {
       for(int x = 1; x<=a; x++)
       {
-         double random = Math.random();
          double x1, x2;
          x1 = x2 = 0;
          for(int b = 0; b<2; b++)
@@ -56,23 +55,23 @@ public class AsteroidPanel extends JPanel
             if(Math.random()>0.5)
             {
                switch(b){
-                  case(0): x1= Math.random()*1.0/2.0+1.0/2.0;
+                  case(0): x1= Math.random()*0.5+0.5;
                   break;
-                  case(1): x2= Math.random()*1.0/2.0+1.0/2.0;
+                  case(1): x2= Math.random()*0.5+0.5;
                   break;
                }
             }
             else
             {
                switch(b){
-                  case(0): x1= Math.random()*(-1.0/2.0)-1.0/2.0;
+                  case(0): x1= Math.random()*-0.5-0.5;
                   break;
-                  case(1): x2= Math.random()*(-1.0/2.0)-1.0/2.0;
+                  case(1): x2= Math.random()*-0.5-0.5;
                   break;
                }
             }
          }
-         if(random<0.5)
+         if(Math.random()<0.5)
             hostiles.add(new Asteroid(0, Math.random()*600, x1, x2, 3));
          else
             hostiles.add(new Asteroid(Math.random()*600, 0, x1, x2, 3));
@@ -84,9 +83,8 @@ public class AsteroidPanel extends JPanel
       {
          for(int x = 1; x<=2; x++)
          {
-            double random = Math.random();
             double x1, x2;
-           x1 = x2 = 0;
+            x1 = x2 = 0;
             for(int b = 0; b<2; b++)
             {
                if(Math.random()>0.5)
@@ -111,9 +109,6 @@ public class AsteroidPanel extends JPanel
          hostiles.add(new Asteroid(a.getX() + 1.0/4.0*a.hit()*25, a.getY() + 1.0/4.0*a.hit()*25, x1, x2, a.hit()-1));
          }
       }
-      else
-      {
-      }
    }
    public void levelUp()
    {
@@ -125,7 +120,7 @@ public class AsteroidPanel extends JPanel
       ship.setdx(0);
       ship.setdy(0);
       level++;
-      if(level==11)
+      if(level==10)
       {
          hostiles.add(new Asteroid(0, 0, 0.5, 0.5, 7));
       }
@@ -169,30 +164,29 @@ public class AsteroidPanel extends JPanel
                   myBuffer.fillOval(150, 23, 25, 25);
                   nameEntered = false;
                   try{
-                  String name = JOptionPane.showInputDialog("Game over your score was " + score + ".\nEnter your name if you want your score to be on the leaderboards.");
-                  if(!name.equals(""))
-                  {
-                     nameEntered = true;
-                     while(name.length()>7)
-                        name = JOptionPane.showInputDialog("Your name was too long, please enter one max 7 characters.");
+                     String name = JOptionPane.showInputDialog("Game over your score was " + score + ".\nEnter your name if you want your score to be on the leaderboards.");
                      name = name.replaceAll(" ", "");
-                     try{
-                        
-                        Scanner infile = new Scanner(this.getClass().getResourceAsStream("Resources/leaderboard.txt"));
-                        ArrayList<String> old = new ArrayList<String>();
-                        while(infile.hasNext())
-                           old.add(infile.nextLine());
-                        infile.close();
-                        PrintStream outfile = new PrintStream("Resources/leaderboard.txt");
-                        for(int z = 0; z<old.size(); z++)
-                           outfile.println(old.get(z));
-                        outfile.println(name);
-                        outfile.println("" + score);
-                        outfile.close();
+                     if(!name.equals(""))
+                     {
+                        nameEntered = true;
+                        while(name.length()>7)
+                           name = JOptionPane.showInputDialog("Your name was too long, please enter one max 7 characters.");
+                        try{
+                           
+                           Scanner infile = new Scanner(this.getClass().getResourceAsStream("Resources/leaderboard.txt"));
+                           ArrayList<String> old = new ArrayList<String>();
+                           while(infile.hasNext())
+                              old.add(infile.nextLine());
+                           infile.close();
+                           PrintStream outfile = new PrintStream("Resources/leaderboard.txt");
+                           for(int z = 0; z<old.size(); z++)
+                              outfile.println(old.get(z));
+                           outfile.println(name);
+                           outfile.println("" + score);
+                           outfile.close();
+                        }
+                        catch(Exception e){}
                      }
-                     catch(Exception e){
-                     }
-                  }
                   }
                   catch(Exception e){}
                   score = 0;
@@ -317,7 +311,9 @@ public class AsteroidPanel extends JPanel
                      ship.draw(myBuffer);
                   }
                   if(shiftTime==0)
-                     myBuffer.setColor(Color.YELLOW);
+                     myBuffer.setColor(Color.GREEN);
+                  if(shiftBreak)
+                     myBuffer.setColor(Color.RED);
                   myBuffer.drawRect(490, 560, 100-shiftTime/2, 25);
    }
    private class Listener implements ActionListener
@@ -541,13 +537,12 @@ public class AsteroidPanel extends JPanel
    {
       public void keyPressed(KeyEvent e)
       {
-         if(isGatling)
-            holdingFire = false;
          if(e.getKeyCode() == KeyEvent.VK_SPACE&&!holdingFire)
          {
             if(game)
             {
-               holdingFire = true;
+               if(!isGatling)
+                  holdingFire = true;
                bullets.add(new Bullet(ship.getX(), ship.getY(), ship.getDegrees()));
             }
             if(title)
